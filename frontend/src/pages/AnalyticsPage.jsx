@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 // ── 더미 데이터 ──────────────────────────────────────────
 const DUMMY_TRANSACTIONS = [
@@ -39,7 +39,7 @@ const CATEGORY_COLORS = {
   수입: '#22c55e',
 }
 
-const BUDGETS = { 식비: 200000, 교통: 50000, 쇼핑: 100000, 구독: 30000, 건강: 80000 }
+const DEFAULT_BUDGETS = { 식비: 200000, 교통: 50000, 쇼핑: 100000, 구독: 30000, 건강: 80000 }
 
 // ── 헬퍼 ────────────────────────────────────────────────
 function fmt(n) {
@@ -54,6 +54,10 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('monthly')
   const [animIn, setAnimIn] = useState(false)
+  const [budgets, setBudgets] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('budgets') || 'null') || DEFAULT_BUDGETS }
+    catch { return DEFAULT_BUDGETS }
+  })
 
   useEffect(() => {
     // 백엔드 미구현 시 더미 사용
@@ -164,7 +168,7 @@ export default function AnalyticsPage() {
             catTotal={catTotal}
           />
         )}
-        {activeTab === 'budget' && <BudgetView byCat={byCat} budgets={BUDGETS} />}
+        {activeTab === 'budget' && <BudgetView byCat={byCat} budgets={budgets} setBudgets={setBudgets} />}
       </div>
 
       {/* ── 카테고리 도넛 + 리스트 ── */}
@@ -358,49 +362,153 @@ function CompareView({ thisExpense, prevExpense, diff, diffPct, catEntries, catT
 }
 
 // ── 예산 관리 ────────────────────────────────────────────
-function BudgetView({ byCat, budgets }) {
+const ALL_CATS = ['식비', '교통', '쇼핑', '구독', '건강', '기타']
+
+function BudgetView({ byCat, budgets, setBudgets }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState({})
+  const [newCat, setNewCat] = useState('')
+  const [newAmt, setNewAmt] = useState('')
+
+  function startEdit() {
+    setDraft(Object.fromEntries(Object.entries(budgets).map(([k, v]) => [k, String(v)])))
+    setEditing(true)
+  }
+
+  function handleSave() {
+    const next = Object.fromEntries(
+      Object.entries(draft)
+        .filter(([, v]) => v !== '' && !isNaN(Number(v)) && Number(v) > 0)
+        .map(([k, v]) => [k, Number(v)])
+    )
+    setBudgets(next)
+    try { localStorage.setItem('budgets', JSON.stringify(next)) } catch {}
+    setEditing(false)
+  }
+
+  function handleDelete(cat) {
+    const next = { ...budgets }
+    delete next[cat]
+    setBudgets(next)
+    try { localStorage.setItem('budgets', JSON.stringify(next)) } catch {}
+  }
+
+  function handleAdd() {
+    if (!newCat || !newAmt || isNaN(Number(newAmt)) || Number(newAmt) <= 0) return
+    const next = { ...budgets, [newCat]: Number(newAmt) }
+    setBudgets(next)
+    try { localStorage.setItem('budgets', JSON.stringify(next)) } catch {}
+    setNewCat(''); setNewAmt('')
+  }
+
+  const unusedCats = ALL_CATS.filter(c => !budgets[c])
+
   return (
     <div>
-      <h3 style={S.sectionTitle}>카테고리별 예산 현황</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h3 style={{ ...S.sectionTitle, margin: 0 }}>카테고리별 예산 현황</h3>
+        {editing
+          ? <div style={{ display: 'flex', gap: 8 }}>
+              <button style={BG.cancelBtn} onClick={() => setEditing(false)}>취소</button>
+              <button style={BG.saveBtn} onClick={handleSave}>저장</button>
+            </div>
+          : <button style={BG.editBtn} onClick={startEdit}>✏️ 예산 수정</button>
+        }
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {Object.entries(budgets).map(([cat, budget]) => {
           const spent = byCat[cat] || 0
-          const pct = Math.min((spent / budget) * 100, 100)
-          const over = spent > budget
+          const pct   = Math.min((spent / budget) * 100, 100)
+          const over  = spent > budget
           const color = pct > 90 ? '#ef4444' : pct > 70 ? '#f97316' : '#6d28d9'
           return (
             <div key={cat}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ ...S.catDot, background: CATEGORY_COLORS[cat] || '#94a3b8' }} />
                   <span style={{ fontSize: 14, fontWeight: 600 }}>{cat}</span>
                 </div>
-                <span style={{ fontSize: 13, color: over ? '#ef4444' : '#6b7280' }}>
-                  {spent.toLocaleString()}원 / {budget.toLocaleString()}원
-                </span>
+                {editing ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      style={BG.budgetInput}
+                      type="number"
+                      value={draft[cat] ?? String(budget)}
+                      onChange={e => setDraft(prev => ({ ...prev, [cat]: e.target.value }))}
+                    />
+                    <span style={{ fontSize: 12, color: '#9ca3af' }}>원</span>
+                    <button style={BG.deleteBtn} onClick={() => handleDelete(cat)}>✕</button>
+                  </div>
+                ) : (
+                  <span style={{ fontSize: 13, color: over ? '#ef4444' : '#6b7280' }}>
+                    {spent.toLocaleString()}원 / {budget.toLocaleString()}원
+                  </span>
+                )}
               </div>
               <div style={{ background: '#f3f4f6', borderRadius: 6, height: 10, overflow: 'hidden' }}>
                 <div style={{
-                  height: '100%',
-                  width: `${pct}%`,
-                  background: color,
-                  borderRadius: 6,
-                  transition: 'width 0.8s ease',
+                  height: '100%', width: `${pct}%`,
+                  background: color, borderRadius: 6, transition: 'width 0.8s ease',
                 }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                <span style={{ fontSize: 11, color: '#9ca3af' }}>{pct.toFixed(0)}% 사용</span>
-                {over
-                  ? <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>⚠️ 예산 초과</span>
-                  : <span style={{ fontSize: 11, color: '#9ca3af' }}>잔여 {(budget - spent).toLocaleString()}원</span>
-                }
-              </div>
+              {!editing && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                  <span style={{ fontSize: 11, color: '#9ca3af' }}>{pct.toFixed(0)}% 사용</span>
+                  {over
+                    ? <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>⚠️ 예산 초과</span>
+                    : <span style={{ fontSize: 11, color: '#9ca3af' }}>잔여 {(budget - spent).toLocaleString()}원</span>
+                  }
+                </div>
+              )}
             </div>
           )
         })}
       </div>
+
+      {/* 카테고리 추가 */}
+      <div style={BG.addRow}>
+        <select
+          style={BG.addSelect}
+          value={newCat}
+          onChange={e => setNewCat(e.target.value)}
+        >
+          <option value="">카테고리 선택</option>
+          {unusedCats.map(c => <option key={c} value={c}>{c}</option>)}
+          <option value="__custom__">직접 입력</option>
+        </select>
+        {newCat === '__custom__' && (
+          <input
+            style={BG.addInput}
+            placeholder="카테고리명"
+            value=""
+            onChange={e => setNewCat(e.target.value)}
+          />
+        )}
+        <input
+          style={BG.addInput}
+          type="number"
+          placeholder="예산 금액"
+          value={newAmt}
+          onChange={e => setNewAmt(e.target.value)}
+        />
+        <span style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>원</span>
+        <button style={BG.addBtn} onClick={handleAdd}>+ 추가</button>
+      </div>
     </div>
   )
+}
+
+const BG = {
+  editBtn:    { padding: '6px 14px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  saveBtn:    { padding: '6px 14px', background: '#6d28d9', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  cancelBtn:  { padding: '6px 14px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 8, cursor: 'pointer', fontSize: 13 },
+  deleteBtn:  { padding: '2px 7px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 6, cursor: 'pointer', fontSize: 12, color: '#ef4444' },
+  budgetInput:{ width: 90, padding: '4px 8px', border: '1px solid #c4b5fd', borderRadius: 6, fontSize: 13, textAlign: 'right', background: '#faf5ff' },
+  addRow:     { display: 'flex', alignItems: 'center', gap: 8, marginTop: 20, paddingTop: 16, borderTop: '1px solid #f3f4f6', flexWrap: 'wrap' },
+  addSelect:  { padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, background: '#fff' },
+  addInput:   { padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, width: 110 },
+  addBtn:     { padding: '8px 14px', background: '#6d28d9', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' },
 }
 
 // ── 도넛 차트 (SVG) ──────────────────────────────────────
