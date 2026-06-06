@@ -1,0 +1,28 @@
+# --- Node / Frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# --- Python / Backend ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# --- 환경 변수 (키 노출 방지) ---
+.env
+.env.*
+!.env.example
+
+# --- 에디터 / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# 참고: CLAUDE 관련 폴더 / 제안서 PDF / report(LaTeX) 는
+# .git/info/exclude (로컬) 에서 별도로 제외 처리됨.

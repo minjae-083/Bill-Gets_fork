@@ -1,0 +1,26 @@
+/* Bill-Gets 전역 스타일 (골격) */
+:root {
+  font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif;
+  color: #1a1a2e;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+.navbar {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e5ef;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #5a3ca0;
+}
+
+.content {
+  padding: 1.5rem;
+}
+
+/* TODO: 페이지/컴포넌트별 스타일 추가 */
