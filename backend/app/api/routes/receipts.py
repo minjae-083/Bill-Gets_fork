@@ -1,7 +1,9 @@
 """영수증 업로드 / OCR 라우터."""
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 
-from app.models.schemas import OcrResult
+from app.core.security import get_current_user_id
+from app.core.supabase_client import get_supabase
+from app.models.schemas import OcrResult, TransactionFromClient
 from app.services import classify_service, ocr_service
 
 router = APIRouter()
@@ -28,3 +30,20 @@ async def upload_receipt(image: UploadFile = File(...)):
     result["category"] = classify_service.classify(result.get("store") or "", item_names)
 
     return OcrResult(**result)
+
+
+@router.post("/confirm", status_code=status.HTTP_201_CREATED)
+def confirm_receipt(
+    body: TransactionFromClient,
+    user_id: str = Depends(get_current_user_id),
+):
+    """OCR 결과를 사용자가 확인/수정 후 지출 내역으로 저장."""
+    sb = get_supabase()
+    result = sb.table("transactions").insert({
+        "user_id": user_id,
+        "store": body.store,
+        "amount": body.amount,
+        "spent_at": body.date,
+        "category": body.category,
+    }).execute()
+    return result.data[0]
