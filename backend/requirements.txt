@@ -1,0 +1,22 @@
+# Bill-Gets 백엔드 의존성
+fastapi
+uvicorn[standard]
+python-dotenv
+python-multipart        # 파일 업로드(영수증 이미지)
+
+# OCR
+opencv-python
+easyocr
+
+# DB / 외부 API
+supabase
+anthropic               # Claude API
+requests                # Kakao Local API 등
+
+# 파일 내보내기
+pandas
+openpyxl
+
+# 인증
+python-jose[cryptography]
+passlib[bcrypt]

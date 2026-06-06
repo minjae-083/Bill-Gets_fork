@@ -1,0 +1,21 @@
+{
+  "name": "bill-gets-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Bill-Gets 영수증 기반 자동 가계부 - 프론트엔드 (React + Vite)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0"
+  }
+}
