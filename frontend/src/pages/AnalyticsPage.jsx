@@ -525,7 +525,7 @@ const S = {
   kpiLabel: { fontSize: 12, color: '#9ca3af', margin: '6px 0 4px', fontWeight: 500 },
   kpiValue: { fontSize: 18, fontWeight: 800, margin: 0 },
   tabRow: { display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: 20, gap: 0 },
-  tab: { flex: 1, padding: '10px 8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#9ca3af', fontWeight: 500, whiteSpace: 'nowrap' },
+  tab: { flex: 1, padding: '10px 8px', background: 'none', borderBottom: '2px solid transparent', border: 'none', cursor: 'pointer', fontSize: 13, color: '#9ca3af', fontWeight: 500, whiteSpace: 'nowrap' },
   tabActive: { color: '#6d28d9', borderBottom: '2px solid #6d28d9', marginBottom: -2, fontWeight: 700 },
   card: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: 22, marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' },
   sectionTitle: { fontSize: 15, fontWeight: 700, marginBottom: 16, color: '#111827' },

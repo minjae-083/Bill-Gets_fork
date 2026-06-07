@@ -142,6 +142,7 @@ const styles = {
     padding: '10px',
     background: 'none',
     border: 'none',
+    borderBottom: '2px solid transparent',
     cursor: 'pointer',
     fontSize: '15px',
     color: '#9ca3af',
