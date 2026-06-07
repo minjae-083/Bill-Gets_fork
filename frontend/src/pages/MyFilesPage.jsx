@@ -361,7 +361,7 @@ const S = {
   page: { maxWidth: 960, margin: '0 auto', padding: '32px 16px', fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif" },
   pageTitle: { fontSize: 26, fontWeight: 800, marginBottom: 24, color: '#111827' },
   tabRow: { display: 'flex', gap: 8, marginBottom: 20, borderBottom: '2px solid #e5e7eb', paddingBottom: 0 },
-  tab: { padding: '10px 18px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#9ca3af', fontWeight: 500 },
+  tab: { padding: '10px 18px', background: 'none', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', fontSize: 14, color: '#9ca3af', fontWeight: 500 },
   tabActive: { color: '#6d28d9', borderBottom: '2px solid #6d28d9', marginBottom: -2, fontWeight: 700 },
   badge: { display: 'inline-block', background: '#6d28d9', color: '#fff', borderRadius: 10, fontSize: 11, padding: '1px 6px', marginLeft: 6 },
 
