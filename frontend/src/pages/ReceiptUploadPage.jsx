@@ -247,7 +247,7 @@ const styles = {
   container: { maxWidth: '600px', margin: '0 auto', padding: '32px 16px' },
   title: { fontSize: '24px', fontWeight: '700', marginBottom: '24px' },
   tabRow: { display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: '24px' },
-  tab: { flex: 1, padding: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#9ca3af', fontWeight: '500' },
+  tab: { flex: 1, padding: '10px', background: 'none', border: 'none', outline: 'none', cursor: 'pointer', fontSize: '14px', color: '#9ca3af', fontWeight: '500' },
   tabActive: { color: '#6d28d9', borderBottom: '2px solid #6d28d9', marginBottom: '-2px' },
   card: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '24px' },
   uploadBox: { border: '2px dashed #d1d5db', borderRadius: '8px', padding: '32px', textAlign: 'center', cursor: 'pointer', marginBottom: '16px' },
